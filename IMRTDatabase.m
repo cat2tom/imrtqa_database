@@ -830,45 +830,43 @@ methods
             end
             data{23,1} = 'sinogram';
             if isfield(record, 'sinogram')
-                data{23,2} = sprintf('%0.32e\t', record.sinogram);
+                data{23,2} = sprintf('%0.4f', record.sinogram);
             end
-            data{24,1} = 'rtplan';
-            data{24,2} = savejson('rtplan', record);
-            data{25,1} = 'birthdate';
+            data{24,1} = 'birthdate';
             if isfield(record, 'patientBirthDate')
-                data{25,2} = datenum(record.patientBirthDate, 'YYYYMMDD');
+                data{24,2} = datenum(record.patientBirthDate, 'YYYYMMDD');
             elseif isfield(record, 'PatientBirthDate')
-                data{25,2} = datenum(record.PatientBirthDate, 'YYYYMMDD');
+                data{24,2} = datenum(record.PatientBirthDate, 'YYYYMMDD');
             end
-            data{26,1} = 'sex';
+            data{25,1} = 'sex';
             if isfield(record, 'patientSex')
-                data{26,2} = record.patientSex(1);
+                data{25,2} = record.patientSex(1);
             elseif isfield(record, 'PatientSex')
-                data{26,2} = record.PatientSex(1);
+                data{25,2} = record.PatientSex(1);
             end
-            data{27,1} = 'iterations';
+            data{26,1} = 'iterations';
             if isfield(record, 'iterations')
-                data{27,2} = record.iterations;
+                data{26,2} = record.iterations;
             end
-            data{28,1} = 'optigrid';
+            data{27,1} = 'optigrid';
             if isfield(record, 'optimizationCalcGrid')
-                data{28,2} = record.optimizationCalcGrid;
+                data{27,2} = record.optimizationCalcGrid;
             end
-            data{29,1} = 'calcgrid';
+            data{28,1} = 'calcgrid';
             if isfield(record, 'calcGrid')
-                data{29,2} = record.calcGrid;
+                data{28,2} = record.calcGrid;
             end
-            data{30,1} = 'laserx';
+            data{29,1} = 'laserx';
             if isfield(record, 'movableLaser')
-                data{30,2} = record.movableLaser(1);
+                data{29,2} = record.movableLaser(1);
             end
-            data{31,1} = 'lasery';
+            data{30,1} = 'lasery';
             if isfield(record, 'movableLaser')
-                data{31,2} = record.movableLaser(2);
+                data{30,2} = record.movableLaser(2);
             end
-            data{32,1} = 'laserz';
+            data{31,1} = 'laserz';
             if isfield(record, 'movableLaser')
-                data{32,2} = record.movableLaser(3);
+                data{31,2} = record.movableLaser(3);
             end
             
             % Insert row into database
@@ -1506,6 +1504,47 @@ methods
         
         % Clear temporary variables
         clear rows row i r;
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function dbUpgradeReduceTomoSize(obj)
+    % Upgrades the IMRT QA database to downsize the Tomo database
+       
+        % Loop through each record
+        sql = 'SELECT uid FROM tomo';
+        cursor = exec(obj.connection, sql);
+        cursor = fetch(cursor);  
+        rows = cursor.Data;
+
+        % Loop through rows
+        for i = 1:length(rows)
+
+            % Query sinogram
+            sql = ['SELECT sinogram FROM tomo ', ...
+                'WHERE uid = ''', rows{i}, ''''];
+            cursor = exec(obj.connection, sql);
+            cursor = fetch(cursor);  
+            row = cursor.Data;
+
+            % If present, compute new actual mod factors
+            if ~isempty(row{1})
+
+                % Retrieve sinogram
+                s = textscan(row{1}, '%f');
+
+                % Update record
+                sql = ['UPDATE tomo SET sinogram = ''', ...
+                    sprintf('%0.4f', s{1}), ''', rtplan = ''', ...
+                    ''' WHERE uid = ''', rows{i}, ''''];
+                exec(obj.connection, sql);
+            end
+        end
+        
+        % Clear temporary variables
+        clear rows row i;
+        
+        % Reduce size of database
+        exec(obj.connection, 'vacuum');
     end
 end
 end
