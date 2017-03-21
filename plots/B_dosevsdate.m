@@ -104,7 +104,7 @@ for i = 1:length(machines)
 end
 
 hold off;
-legend(machines(~strcmp(machines, '')));
+legend(machines(~strcmp(machines, '')), 'Location', 'bestoutside');
 ylabel('Abs Dose Difference (%)');
 xlabel('');
 if range(2)-range(1) < 366
@@ -164,7 +164,7 @@ for i = 1:length(phantoms)
 end
 
 hold off;
-legend(phantoms(~strcmp(phantoms, '')));
+legend(phantoms(~strcmp(phantoms, '')), 'Location', 'bestoutside');
 ylabel('Abs Dose Difference (%)');
 xlabel('');
 if range(2)-range(1) < 366
