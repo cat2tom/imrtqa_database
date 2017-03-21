@@ -77,6 +77,8 @@ handles.machines = {
     '0210477'       'tomo'
     '0210488'       'tomo'
     'TrueBeam1358'  'linac'
+    'TrueBeamSTx'   'linac'
+    'TrueBeam'      'linac'
     '21EXUnified'   'linac'
 };
 
