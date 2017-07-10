@@ -2,3 +2,4 @@
 log.txt
 *.m~
 .smbdelete*
+.DS_STORE

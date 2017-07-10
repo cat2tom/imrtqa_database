@@ -3,7 +3,7 @@ function varargout = ScanReports(path, varargin)
 % Inputs:
 % Directory to scan
 % (opt) Database handle
-% (opt) Mobius info (server, user, pass)
+% (opt) Mobius connection
 % (opt) Machines list
 %
 % Outputs:
@@ -42,18 +42,6 @@ if exist('XpdfText', 'file') ~= 2
         'submodule update to fetch all submodules'], 'ERROR');
 end
 
-% Add dicom_tools submodule to search path
-addpath('./dicom_tools');
-
-% Check if MATLAB can find LoadJSONTomoPlan
-if exist('LoadJSONTomoPlan', 'file') ~= 2
-    
-    % If not, throw an error
-    Event(['The dicom_tools submodule does not exist in the search path. ', ...
-        'Use git clone --recursive or git submodule init followed by git ', ...
-        'submodule update to fetch all submodules'], 'ERROR');
-end
-
 % Add jsonlab folder to search path
 addpath('./mobius_query');
 
@@ -71,8 +59,7 @@ end
 Event('Retrieving current patient list from database');
 
 % Retrieve updated Mobius3D patient list
-[server.session, plist] = ...
-    QueryPatientList('server', server.server, 'session', server.session);
+[server, plist] = QueryPatientList(server);
 
 % Log start of search and start timer
 Event(['Searching ', path, ' for IMRT QA reports']);
@@ -217,8 +204,7 @@ while i < size(list, 1)
                 % Search Mobius3D for check using plan name
                 Event(['Retrieving JSON and RTPLAN data from Mobius3D ', ...
                     'server']);
-                [server.session, mobius] = MatchPlanCheck('server', ...
-                    server.server, 'session', server.session, 'id', ...
+                [server, mobius] = MatchPlanCheck(server, 'id', ...
                     delta4.ID, 'plan', delta4.plan, 'list', plist);
                 
                 % If no data was returned, search again by date
@@ -227,8 +213,7 @@ while i < size(list, 1)
                     Event(['Plan ', delta4.plan, ...
                         ' not found, searching by plan date']);
                     
-                    [server.session, mobius] = MatchPlanCheck('server', ...
-                        server.server, 'session', server.session, 'id', ...
+                    [server, mobius] = MatchPlanCheck(server, 'id', ...
                         delta4.ID, 'date', delta4.planDate, 'list', plist);
                 end
                 
@@ -237,11 +222,9 @@ while i < size(list, 1)
                         db.dataExists(mobius, 'mobuis') == 0
                     
                     % Retrieve DVH and RTPlan
-                    [server.session, mobius.dvh] = GetPlanCheckDVH('server', ...
-                        server.server, 'session', server.session, 'plan', ...
-                        mobius);
-                    [server.session, rtplan] = GetRTPlan('server', ...
-                        server.server, 'session', server.session, 'plan', ...
+                    [server, mobius.dvh] = GetPlanCheckDVH(server, ...
+                        'plan', mobius);
+                    [server, rtplan] = GetRTPlan(server, 'plan', ...
                         mobius);
                     
                     % Execute addRecord to add result to database
@@ -265,34 +248,25 @@ while i < size(list, 1)
                     switch type
 
                     case 'tomo'  
-                        
-                        % Execute LoadJSONTomoPlan to extract TomoTherapy 
-                        % specific plan data
-                        tomo = LoadJSONTomoPlan(rtplan);
-
                         % If TomoTherapy data does not already exist in the 
                         % database 
-                        if db.dataExists(tomo, 'tomo') == 0
+                        if db.dataExists(rtplan, 'tomo') == 0
 
                             % Execute addRecord to add result to database
                             Event('Saving TomoTherapy data into database');
-                            delta4.tomouid = db.addRecord(tomo, 'tomo');
+                            delta4.tomouid = db.addRecord(rtplan, 'tomo');
                         else
                             Event(['TomoTherapy data already exists for this ', ...
                                 'patient in the database']);
                         end
 
                     case 'linac'
-
-                        % Execute LoadJSONPlan to extract plan data
-                        linac = LoadJSONPlan(rtplan);
-
                         % If Linac data does not already exist in the database 
-                        if db.dataExists(linac, 'linac') == 0
+                        if db.dataExists(rtplan, 'linac') == 0
 
                             % Execute addRecord to add result to database
                             Event('Saving Linac data into database');
-                            delta4.linacuid = db.addRecord(linac, 'linac');
+                            delta4.linacuid = db.addRecord(rtplan, 'linac');
                         else
                             Event(['Linac data already exists for this ', ...
                                 'patient in the database']);

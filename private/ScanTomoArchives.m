@@ -17,7 +17,7 @@ db = [];
 range = 72;
 
 % Loop through input arguments
-for i = 1:2:nargin-1
+for i = 1:2:length(varargin)
     
     % Store optional variables
     if strcmpi(varargin{i}, 'db')
@@ -32,7 +32,7 @@ addpath('./tomo_extract');
 if exist('LoadPlan', 'file') ~= 2
     
     % If not, throw an error
-    Event(['The tomo_exctract submodule does not exist in the search path. ', ...
+    Event(['The tomo_extract submodule does not exist in the search path. ', ...
         'Use git clone --recursive or git submodule init followed by git ', ...
         'submodule update to fetch all submodules'], 'ERROR');
 end

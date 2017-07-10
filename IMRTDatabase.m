@@ -1,6 +1,5 @@
 classdef IMRTDatabase
     
-% Requires jsonlab
 % Requires database toolbox
     
 % Object variables
@@ -18,9 +17,6 @@ methods
         % Add SQLite JDBC driver (current database is 3.8.5)
         javaaddpath('./sqlite-jdbc-3.8.5-pre1.jar');
     
-        % Add jsonlab submodule to search path
-        addpath('./jsonlab');
-        
         % Verify database file exists
         if exist(db, 'file') == 2
         
@@ -498,7 +494,7 @@ methods
 
         case 'tomo'
 
-            % If the fields exist
+            % If the tomo_extract fields exist
             if isfield(record, 'patientID') && isfield(record, 'planLabel') && ...
                     isfield(record, 'timestamp')
                 
@@ -507,6 +503,22 @@ methods
                     record.patientID, ''' AND plan = ''', ...
                     record.planLabel, ''' AND plandate = ''', ...
                     sprintf('%0.10f', datenum(record.timestamp)), ''''];
+                cursor = exec(obj.connection, sql);
+                cursor = fetch(cursor);  
+                n = cursor.Data{1};
+                close(cursor);
+               
+            % Otherwise, if the RT plan fields exist
+            elseif isfield(record, 'PatientID') && isfield(record, 'RTPlanName') ...
+                    && isfield(record, 'RTPlanDate') ...
+                    && isfield(record, 'RTPlanTime')
+                
+                % Query the record based on the patient ID, plan, and date
+                sql = ['SELECT COUNT(uid) FROM tomo WHERE id = ''', ...
+                    record.PatientID, ''' AND plan = ''', record.RTPlanName, ...
+                    ''' AND plandate = ''', sprintf('%0.10f', ...
+                    datenum([record.RTPlanDate, '-', record.RTPlanTime], ...
+                    'yyyymmdd-HHMMSS')), ''''];
                 cursor = exec(obj.connection, sql);
                 cursor = fetch(cursor);  
                 n = cursor.Data{1};
@@ -689,7 +701,7 @@ methods
             end
             data{28,1} = 'report';
             if isfield(record, 'report')
-                 data{28,2} = savejson('report', record.report);
+                 data{28,2} = jsonencode(record.report);
             end
             data{29,1} = 'machinetype';
             if isfield(record, 'machineType')
@@ -724,26 +736,51 @@ methods
             data{2,1} = 'id';
             if isfield(record, 'patientID')
                 data{2,2} = record.patientID;
+            elseif isfield(record, 'PatientID')
+                data{2,2} = record.PatientID;
             end
             data{3,1} = 'name';
             if isfield(record, 'patientName')
                 data{3,2} = record.patientName;
+            elseif isfield(record, 'PatientName')
+                data{3,2} = record.PatientName;
             end
             data{4,1} = 'plan';
             if isfield(record, 'planLabel')
                 data{4,2} = record.planLabel;
+            elseif isfield(record, 'RTPlanName')
+                data{4,2} = record.RTPlanName;
             end
             data{5,1} = 'plandate';
             if isfield(record, 'timestamp')
                 data{5,2} = sprintf('%0.10f', datenum(record.timestamp));
+            elseif isfield(record, 'RTPlanDate')
+                data{5,2} = sprintf('%0.10f', datenum([record.RTPlanDate, ...
+                    '-', record.RTPlanTime], 'yyyymmdd-HHMMSS'));
             end
             data{6,1} = 'machine';
             if isfield(record, 'machine')
                 data{6,2} = record.machine;
+            elseif isfield(record, 'BeamSequence') && ...
+                    length(record.BeamSequence) == 1 && ...        
+                    isfield(record.BeamSequence, ...
+                    'TreatmentMachineName')
+                data{6,2} = record.BeamSequence.TreatmentMachineName;
+            elseif isfield(record, 'BeamSequence') && ...
+                    length(record.BeamSequence) > 1 && ...        
+                    isfield(record.BeamSequence(1), ...
+                    'TreatmentMachineName')
+                data{6,2} = record.BeamSequence(1).TreatmentMachineName;
             end
             data{7,1} = 'gantrymode';
             if isfield(record, 'planType')
                 data{7,2} = record.planType;
+            elseif isfield(record, 'BeamSequence')
+                if length(fieldnames(record.BeamSequence)) > 1
+                    data{7,2} = 'Fixed_Angle';
+                else
+                    data{7,2} = 'Helical';
+                end    
             end
             data{8,1} = 'jawmode';
             if isfield(record, 'jawType')
@@ -901,10 +938,15 @@ methods
             end
             data{6,1} = 'machine';
             if isfield(record, 'BeamSequence') && ...
-                    isfield(record.BeamSequence, 'Item_1') && ...
-                    isfield(record.BeamSequence.Item_1, ...
+                    length(record.BeamSequence) == 1 && ...
+                    isfield(record.BeamSequence, ...
                     'TreatmentMachineName')
-                data{6,2} = record.BeamSequence.Item_1.TreatmentMachineName;
+                data{6,2} = record.BeamSequence.TreatmentMachineName;
+            elseif isfield(record, 'BeamSequence') && ...
+                    length(record.BeamSequence) > 1 && ...
+                    isfield(record.BeamSequence(1), ...
+                    'TreatmentMachineName')
+                data{6,2} = record.BeamSequence(1).TreatmentMachineName;
             end
             data{7,1} = 'tps';
             if isfield(record, 'ManufacturerModelName')
@@ -912,47 +954,65 @@ methods
             end
             data{8,1} = 'mode';
             if isfield(record, 'BeamSequence') && ...
-                    isfield(record.BeamSequence, 'Item_1') && ...
-                    isfield(record.BeamSequence.Item_1, ...
+                    length(record.BeamSequence) == 1 && ...
+                    isfield(record.BeamSequence, ...
                     'BeamType')
-                data{8,2} = record.BeamSequence.Item_1.BeamType;
+                data{8,2} = record.BeamSequence.BeamType;
+            elseif isfield(record, 'BeamSequence') && ...
+                    length(record.BeamSequence) > 1 && ...
+                    isfield(record.BeamSequence(1), ...
+                    'BeamType')
+                data{8,2} = record.BeamSequence(1).BeamType;
             end
             data{9,1} = 'numbeams';
             if isfield(record, 'BeamSequence')
-                data{9,2} = length(fieldnames(record.BeamSequence));
+                data{9,2} = length(record.BeamSequence);
             end
             data{10,1} = 'numcps';
             if isfield(record, 'BeamSequence')
-                cps = 0;
-                for i = 1:length(fieldnames(record.BeamSequence))
-                    if isfield(record.BeamSequence.(sprintf('Item_%i', i)), ...
-                            'NumberOfControlPoints')
-                        cps = cps + record.BeamSequence...
-                            .(sprintf('Item_%i', i)).NumberOfControlPoints;
+                if length(record.BeamSequence) == 1
+                    cps = record.BeamSequence.NumberOfControlPoints;
+                else
+                    cps = 0;
+                    for i = 1:length(record.BeamSequence)
+                        if isfield(record.BeamSequence(i), ...
+                                'NumberOfControlPoints')
+                            cps = cps + record.BeamSequence(i)...
+                                .NumberOfControlPoints;
+                        end
                     end
                 end
                 data{10,2} = cps;
             end
             data{11,1} = 'doseperfx';
             if isfield(record, 'FractionGroupSequence') && ...
-                    isfield(record.FractionGroupSequence, 'Item_1') && ...
-                    isfield(record.FractionGroupSequence.Item_1, ...
+                    length(record.FractionGroupSequence) == 1 && ...
+                    isfield(record.FractionGroupSequence, ...
                     'ReferencedBeamSequence')
-                d = 0;
-                for i = 1:length(fieldnames(record.FractionGroupSequence.Item_1...
-                        .ReferencedBeamSequence))
-                    d = d + record.FractionGroupSequence.Item_1...
-                        .ReferencedBeamSequence.(sprintf('Item_%i', i))...
-                        .BeamDose;
+                if length(record.FractionGroupSequence...
+                        .ReferencedBeamSequence) == 1 && ...
+                        isfield(record.FractionGroupSequence...
+                        .ReferencedBeamSequence, 'BeamDose')
+                    d = record.FractionGroupSequence...
+                        .ReferencedBeamSequence.BeamDose;
+                elseif length(record.FractionGroupSequence...
+                        .ReferencedBeamSequence) > 1
+                    d = 0;
+                    for i = 1:length(record.FractionGroupSequence...
+                            .ReferencedBeamSequence)
+                        d = d + record.FractionGroupSequence...
+                            .ReferencedBeamSequence(i)...
+                            .BeamDose;
+                    end
                 end
                 data{11,2} = d;
             end
             data{12,1} = 'fractions';
             if isfield(record, 'FractionGroupSequence') && ...
-                    isfield(record.FractionGroupSequence, 'Item_1') && ...
-                    isfield(record.FractionGroupSequence.Item_1, ...
+                    length(record.FractionGroupSequence) == 1 && ...
+                    isfield(record.FractionGroupSequence, ...
                     'NumberOfFractionsPlanned')
-                data{12,2} = record.FractionGroupSequence.Item_1...
+                data{12,2} = record.FractionGroupSequence...
                     .NumberOfFractionsPlanned;
             end
             data{13,1} = 'rxdose';
@@ -960,17 +1020,13 @@ methods
                 data{13,2} = data{11,2} * data{12,2};
             end
             data{14,1} = 'rtplan';
-            data{14,2} = savejson('rtplan', record);
+            data{14,2} = jsonencode(record);
             data{15,1} = 'birthdate';
-            if isfield(record, 'patientBirthDate')
-                data{15,2} = datenum(record.patientBirthDate, 'YYYYMMDD');
-            elseif isfield(record, 'PatientBirthDate')
+            if isfield(record, 'PatientBirthDate')
                 data{15,2} = datenum(record.PatientBirthDate, 'YYYYMMDD');
             end
             data{16,1} = 'sex';
-            if isfield(record, 'patientSex')
-                data{16,2} = record.patientSex(1);
-            elseif isfield(record, 'PatientSex')
+            if isfield(record, 'PatientSex')
                 data{16,2} = record.PatientSex(1);
             end
             
@@ -1037,11 +1093,11 @@ methods
             end
             data{10,1} = 'dvh';
             if isfield(record, 'dvh')
-                data{10,2} = savejson('dvh', record.dvh);
+                data{10,2} = jsonencode(record.dvh);
                 record = rmfield(record, 'dvh');
             end
             data{11,1} = 'plancheck';
-            data{11,2} = savejson('plancheck', record);
+            data{11,2} = jsonencode(record);
             
             % Insert row into database
             datainsert(obj.connection, 'mobius', data(:,1)', data(:,2)');

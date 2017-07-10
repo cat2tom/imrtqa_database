@@ -1,0 +1,6 @@
+DATABASE    =     database.db
+MACHINES    =     0210477,0210488,TrueBeam1358,TrueBeamSTx,TrueBeam,21EXUnified
+M3D_SERVER	=     10.105.1.12
+M3D_USER	=     admin
+M3D_PASS	=     admin
+
