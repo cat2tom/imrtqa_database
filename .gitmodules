@@ -7,9 +7,6 @@
 [submodule "xpdf_tools"]
 	path = xpdf_tools
 	url = https://github.com/mwgeurts/xpdf_tools
-[submodule "jsonlab"]
-	path = jsonlab
-	url = https://github.com/fangq/jsonlab
 [submodule "mobius_query"]
 	path = mobius_query
 	url = https://github.com/mwgeurts/mobius_query
