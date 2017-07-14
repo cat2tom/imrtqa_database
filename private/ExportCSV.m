@@ -34,7 +34,7 @@ if ~isequal(path, 0)
     Event(['Default file path updated to ', path]);
     
     % Export delta4, tomo, linac, and mobius tables
-    tables = {'delta4', 'linac', 'tomo', 'mobius'};
+    tables = {'delta4', 'linac', 'mobius', 'tomo'};
     for i = 1:length(tables)
         Event(['Exporting ', tables{i}, ' table contents to ', ...
             fullfile(path, [tables{i}, '.csv'])]);
