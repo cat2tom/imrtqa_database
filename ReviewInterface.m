@@ -145,6 +145,9 @@ else
 end
 
 %% Connect Mobius3D
+% Log database load
+Event('Establishing connection to Mobius3D server');
+
 % Add jsonlab folder to search path
 addpath('./mobius_query');
 
