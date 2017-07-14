@@ -55,7 +55,7 @@ methods
             sql = 'SELECT COUNT(uid) FROM delta4';
             cursor = exec(obj.connection, sql);
             cursor = fetch(cursor);
-            if ~issstruct(cursor.Data)
+            if ~iscell(cursor.Data)
                 if exist('Event', 'file') == 2
                     Event(cursor.Message, 'ERROR');
                 else
@@ -73,7 +73,7 @@ methods
                 varargin{1}, ''''];
             cursor = exec(obj.connection, sql);
             cursor = fetch(cursor);  
-            if ~issstruct(cursor.Data)
+            if ~iscell(cursor.Data)
                 if exist('Event', 'file') == 2
                     Event(cursor.Message, 'ERROR');
                 else
@@ -98,7 +98,7 @@ methods
             ' tomouid IS NULL'];
         cursor = exec(obj.connection, sql);
         cursor = fetch(cursor);  
-        if ~issstruct(cursor.Data)
+        if ~iscell(cursor.Data)
             if exist('Event', 'file') == 2
                 Event(cursor.Message, 'ERROR');
             else
@@ -109,7 +109,7 @@ methods
         sql = 'SELECT COUNT(uid) FROM delta4';
         cursor = exec(obj.connection, sql);
         cursor = fetch(cursor); 
-        if ~issstruct(cursor.Data)
+        if ~iscell(cursor.Data)
             if exist('Event', 'file') == 2
                 Event(cursor.Message, 'ERROR');
             else
@@ -132,7 +132,7 @@ methods
             sql = 'SELECT COUNT(uid) FROM tomo';
             cursor = exec(obj.connection, sql);
             cursor = fetch(cursor);
-            if ~issstruct(cursor.Data)
+            if ~iscell(cursor.Data)
                 if exist('Event', 'file') == 2
                     Event(cursor.Message, 'ERROR');
                 else
@@ -145,7 +145,7 @@ methods
             sql = 'SELECT COUNT(uid) FROM linac';
             cursor = exec(obj.connection, sql);
             cursor = fetch(cursor);  
-            if ~issstruct(cursor.Data)
+            if ~iscell(cursor.Data)
                 if exist('Event', 'file') == 2
                     Event(cursor.Message, 'ERROR');
                 else
@@ -167,7 +167,7 @@ methods
             end
             cursor = exec(obj.connection, sql);
             cursor = fetch(cursor);  
-            if ~issstruct(cursor.Data)
+            if ~iscell(cursor.Data)
                 if exist('Event', 'file') == 2
                     Event(cursor.Message, 'ERROR');
                 else
@@ -463,10 +463,10 @@ methods
         
         % Query the record based on the patient ID, plan, and date
         sql = ['SELECT COUNT(fullfile) FROM scannedfiles WHERE fullfile = ''', ...
-            file, ''''];
+            strrep(file, '''', ''), ''''];
         cursor = exec(obj.connection, sql);
         cursor = fetch(cursor); 
-        if ~issstruct(cursor.Data)
+        if ~iscell(cursor.Data)
             if exist('Event', 'file') == 2
                 Event(cursor.Message, 'ERROR');
             else
@@ -482,7 +482,8 @@ methods
     function addScannedFile(obj, file)
         
         % Insert row into database
-        datainsert(obj.connection, 'scannedfiles', {'fullfile'}, {file});
+        datainsert(obj.connection, 'scannedfiles', {'fullfile'}, ...
+            {strrep(file, '''', '')});
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -493,7 +494,7 @@ methods
         sql = 'SELECT MIN(plandate), MAX(plandate) FROM delta4';
         cursor = exec(obj.connection, sql);
         cursor = fetch(cursor); 
-        if ~issstruct(cursor.Data)
+        if ~iscell(cursor.Data)
             if exist('Event', 'file') == 2
                 Event(cursor.Message, 'ERROR');
             else
@@ -507,7 +508,7 @@ methods
         sql = 'SELECT MIN(plandate), MAX(plandate) FROM tomo';
         cursor = exec(obj.connection, sql);
         cursor = fetch(cursor);  
-        if ~issstruct(cursor.Data)
+        if ~iscell(cursor.Data)
             if exist('Event', 'file') == 2
                 Event(cursor.Message, 'ERROR');
             else
@@ -521,7 +522,7 @@ methods
         sql = 'SELECT MIN(plandate), MAX(plandate) FROM linac';
         cursor = exec(obj.connection, sql);
         cursor = fetch(cursor); 
-        if ~issstruct(cursor.Data)
+        if ~iscell(cursor.Data)
             if exist('Event', 'file') == 2
                 Event(cursor.Message, 'ERROR');
             else
@@ -535,7 +536,7 @@ methods
         sql = 'SELECT MIN(plandate), MAX(plandate) FROM mobius';
         cursor = exec(obj.connection, sql);
         cursor = fetch(cursor);  
-        if ~issstruct(cursor.Data)
+        if ~iscell(cursor.Data)
             if exist('Event', 'file') == 2
                 Event(cursor.Message, 'ERROR');
             else
@@ -572,7 +573,7 @@ methods
                     datenum(record.planDate)), ''''];
                 cursor = exec(obj.connection, sql);
                 cursor = fetch(cursor);
-                if ~issstruct(cursor.Data)
+                if ~iscell(cursor.Data)
                     if exist('Event', 'file') == 2
                         Event(cursor.Message, 'ERROR');
                     else
@@ -596,7 +597,7 @@ methods
                     sprintf('%0.10f', datenum(record.timestamp)), ''''];
                 cursor = exec(obj.connection, sql);
                 cursor = fetch(cursor);  
-                if ~issstruct(cursor.Data)
+                if ~iscell(cursor.Data)
                     if exist('Event', 'file') == 2
                         Event(cursor.Message, 'ERROR');
                     else
@@ -619,7 +620,7 @@ methods
                     'yyyymmdd-HHMMSS')), ''''];
                 cursor = exec(obj.connection, sql);
                 cursor = fetch(cursor);  
-                if ~issstruct(cursor.Data)
+                if ~iscell(cursor.Data)
                     if exist('Event', 'file') == 2
                         Event(cursor.Message, 'ERROR');
                     else
@@ -645,7 +646,7 @@ methods
                     'yyyymmdd-HHMMSS')), ''''];
                 cursor = exec(obj.connection, sql);
                 cursor = fetch(cursor);  
-                if ~issstruct(cursor.Data)
+                if ~iscell(cursor.Data)
                     if exist('Event', 'file') == 2
                         Event(cursor.Message, 'ERROR');
                     else
@@ -673,7 +674,7 @@ methods
                     ''''];
                 cursor = exec(obj.connection, sql);
                 cursor = fetch(cursor); 
-                if ~issstruct(cursor.Data)
+                if ~iscell(cursor.Data)
                     if exist('Event', 'file') == 2
                         Event(cursor.Message, 'ERROR');
                     else
