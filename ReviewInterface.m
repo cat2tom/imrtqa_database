@@ -124,11 +124,10 @@ Event(['Default file path set to ', handles.path]);
 Event(['Loading default database file ', handles.config.DATABASE]);
 
 % Verify database file exists
-if exist(fullfile(handles.path, handles.config.DATABASE), 'file') == 2
+if exist(fullfile(handles.config.DATABASE), 'file') == 2
 
     % Initialize new connection to database
-    handles.db = IMRTDatabase(fullfile(handles.path, ...
-        handles.config.DATABASE));
+    handles.db = IMRTDatabase(fullfile(handles.config.DATABASE));
     
     % Verify database has loaded
     if isempty(handles.db.connection.URL)
