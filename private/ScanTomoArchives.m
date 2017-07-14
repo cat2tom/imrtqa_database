@@ -250,8 +250,8 @@ while i < size(list, 1)
             else
 
                 % Warn user no plans were found
-                Event('No approved plans were found in the archive XML ', ...
-                    patient);
+                Event(['No approved plans were found in the archive XML ', ...
+                    patient]);
             end
             
             % Clear temporary variables
