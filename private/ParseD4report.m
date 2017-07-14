@@ -77,7 +77,7 @@ while r < length(content)
             fields{4}], 'InputFormat', 'M/d/yyyy h:m a');
         
         % Store user, if present
-        if length(fields) >= 4
+        if length(fields) > 4
             delta4.planUser = fields{5};
         end
         
