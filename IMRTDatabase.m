@@ -54,7 +54,14 @@ methods
             % Return the size of the delta4 table
             sql = 'SELECT COUNT(uid) FROM delta4';
             cursor = exec(obj.connection, sql);
-            cursor = fetch(cursor);  
+            cursor = fetch(cursor);
+            if ~issstruct(cursor.Data)
+                if exist('Event', 'file') == 2
+                    Event(cursor.Message, 'ERROR');
+                else
+                    error(cursor.Message);
+                end
+            end
             n = cursor.Data{1};
             close(cursor);
             
@@ -66,6 +73,13 @@ methods
                 varargin{1}, ''''];
             cursor = exec(obj.connection, sql);
             cursor = fetch(cursor);  
+            if ~issstruct(cursor.Data)
+                if exist('Event', 'file') == 2
+                    Event(cursor.Message, 'ERROR');
+                else
+                    error(cursor.Message);
+                end
+            end
             n = cursor.Data{1};
             close(cursor);
         end
@@ -84,10 +98,24 @@ methods
             ' tomouid IS NULL'];
         cursor = exec(obj.connection, sql);
         cursor = fetch(cursor);  
+        if ~issstruct(cursor.Data)
+            if exist('Event', 'file') == 2
+                Event(cursor.Message, 'ERROR');
+            else
+                error(cursor.Message);
+            end
+        end
         n = cursor.Data{1};
         sql = 'SELECT COUNT(uid) FROM delta4';
         cursor = exec(obj.connection, sql);
         cursor = fetch(cursor); 
+        if ~issstruct(cursor.Data)
+            if exist('Event', 'file') == 2
+                Event(cursor.Message, 'ERROR');
+            else
+                error(cursor.Message);
+            end
+        end
         n = 1 - n/cursor.Data{1};
         close(cursor);
     end
@@ -103,13 +131,27 @@ methods
             % Query the size of the tomo table
             sql = 'SELECT COUNT(uid) FROM tomo';
             cursor = exec(obj.connection, sql);
-            cursor = fetch(cursor);  
+            cursor = fetch(cursor);
+            if ~issstruct(cursor.Data)
+                if exist('Event', 'file') == 2
+                    Event(cursor.Message, 'ERROR');
+                else
+                    error(cursor.Message);
+                end
+            end
             n = cursor.Data{1};
             
             % Query the size of the linac table
             sql = 'SELECT COUNT(uid) FROM linac';
             cursor = exec(obj.connection, sql);
             cursor = fetch(cursor);  
+            if ~issstruct(cursor.Data)
+                if exist('Event', 'file') == 2
+                    Event(cursor.Message, 'ERROR');
+                else
+                    error(cursor.Message);
+                end
+            end
             n = n + cursor.Data{1};
             close(cursor);
             
@@ -125,6 +167,13 @@ methods
             end
             cursor = exec(obj.connection, sql);
             cursor = fetch(cursor);  
+            if ~issstruct(cursor.Data)
+                if exist('Event', 'file') == 2
+                    Event(cursor.Message, 'ERROR');
+                else
+                    error(cursor.Message);
+                end
+            end
             n = cursor.Data{1};
             close(cursor);
         end
@@ -416,7 +465,14 @@ methods
         sql = ['SELECT COUNT(fullfile) FROM scannedfiles WHERE fullfile = ''', ...
             file, ''''];
         cursor = exec(obj.connection, sql);
-        cursor = fetch(cursor);  
+        cursor = fetch(cursor); 
+        if ~issstruct(cursor.Data)
+            if exist('Event', 'file') == 2
+                Event(cursor.Message, 'ERROR');
+            else
+                error(cursor.Message);
+            end
+        end
         n = cursor.Data{1};
         close(cursor);
         clear sql cursor;
@@ -436,7 +492,14 @@ methods
         % Query the highest and lowest plan dates from delta4 table
         sql = 'SELECT MIN(plandate), MAX(plandate) FROM delta4';
         cursor = exec(obj.connection, sql);
-        cursor = fetch(cursor);  
+        cursor = fetch(cursor); 
+        if ~issstruct(cursor.Data)
+            if exist('Event', 'file') == 2
+                Event(cursor.Message, 'ERROR');
+            else
+                error(cursor.Message);
+            end
+        end
         low = cursor.Data{1};
         high = cursor.Data{2};
         
@@ -444,13 +507,27 @@ methods
         sql = 'SELECT MIN(plandate), MAX(plandate) FROM tomo';
         cursor = exec(obj.connection, sql);
         cursor = fetch(cursor);  
+        if ~issstruct(cursor.Data)
+            if exist('Event', 'file') == 2
+                Event(cursor.Message, 'ERROR');
+            else
+                error(cursor.Message);
+            end
+        end
         low = min(low, cursor.Data{1});
         high = max(high, cursor.Data{2});
         
         % Query the highest and lowest plan dates from linac table
         sql = 'SELECT MIN(plandate), MAX(plandate) FROM linac';
         cursor = exec(obj.connection, sql);
-        cursor = fetch(cursor);  
+        cursor = fetch(cursor); 
+        if ~issstruct(cursor.Data)
+            if exist('Event', 'file') == 2
+                Event(cursor.Message, 'ERROR');
+            else
+                error(cursor.Message);
+            end
+        end
         low = min(low, cursor.Data{1});
         high = max(high, cursor.Data{2});
         
@@ -458,6 +535,13 @@ methods
         sql = 'SELECT MIN(plandate), MAX(plandate) FROM mobius';
         cursor = exec(obj.connection, sql);
         cursor = fetch(cursor);  
+        if ~issstruct(cursor.Data)
+            if exist('Event', 'file') == 2
+                Event(cursor.Message, 'ERROR');
+            else
+                error(cursor.Message);
+            end
+        end
         low = min(low, cursor.Data{1});
         high = max(high, cursor.Data{2});
         
@@ -487,7 +571,14 @@ methods
                     'plandate = ''', sprintf('%0.10f', ...
                     datenum(record.planDate)), ''''];
                 cursor = exec(obj.connection, sql);
-                cursor = fetch(cursor);  
+                cursor = fetch(cursor);
+                if ~issstruct(cursor.Data)
+                    if exist('Event', 'file') == 2
+                        Event(cursor.Message, 'ERROR');
+                    else
+                        error(cursor.Message);
+                    end
+                end
                 n = cursor.Data{1};
                 close(cursor);
             end
@@ -505,6 +596,13 @@ methods
                     sprintf('%0.10f', datenum(record.timestamp)), ''''];
                 cursor = exec(obj.connection, sql);
                 cursor = fetch(cursor);  
+                if ~issstruct(cursor.Data)
+                    if exist('Event', 'file') == 2
+                        Event(cursor.Message, 'ERROR');
+                    else
+                        error(cursor.Message);
+                    end
+                end
                 n = cursor.Data{1};
                 close(cursor);
                
@@ -521,6 +619,13 @@ methods
                     'yyyymmdd-HHMMSS')), ''''];
                 cursor = exec(obj.connection, sql);
                 cursor = fetch(cursor);  
+                if ~issstruct(cursor.Data)
+                    if exist('Event', 'file') == 2
+                        Event(cursor.Message, 'ERROR');
+                    else
+                        error(cursor.Message);
+                    end
+                end
                 n = cursor.Data{1};
                 close(cursor);
             end
@@ -540,6 +645,13 @@ methods
                     'yyyymmdd-HHMMSS')), ''''];
                 cursor = exec(obj.connection, sql);
                 cursor = fetch(cursor);  
+                if ~issstruct(cursor.Data)
+                    if exist('Event', 'file') == 2
+                        Event(cursor.Message, 'ERROR');
+                    else
+                        error(cursor.Message);
+                    end
+                end
                 n = cursor.Data{1};
                 close(cursor);
             end
@@ -560,7 +672,14 @@ methods
                     record.settings.planInfo_dict.RTGeneralPlan.RTPlanDate])), ...
                     ''''];
                 cursor = exec(obj.connection, sql);
-                cursor = fetch(cursor);  
+                cursor = fetch(cursor); 
+                if ~issstruct(cursor.Data)
+                    if exist('Event', 'file') == 2
+                        Event(cursor.Message, 'ERROR');
+                    else
+                        error(cursor.Message);
+                    end
+                end
                 n = cursor.Data{1};
                 close(cursor);
             end
