@@ -222,10 +222,21 @@ while i < size(list, 1)
                         db.dataExists(mobius, 'mobuis') == 0
                     
                     % Retrieve DVH and RTPlan
-                    [server, mobius.dvh] = GetPlanCheckDVH(server, ...
-                        'plan', mobius);
-                    [server, rtplan] = GetRTPlan(server, 'plan', ...
-                        mobius);
+                    try
+                        [server, mobius.dvh] = GetPlanCheckDVH(server, ...
+                            'plan', mobius);
+                    catch
+                        mobius.dvh = [];
+                        Event('DVH data could not be found', 'WARN');
+                    end
+                    
+                    try
+                        [server, rtplan] = GetRTPlan(server, 'plan', ...
+                            mobius);
+                    catch
+                        rtplan = [];
+                        Event('RT Plan data could not be found', 'WARN');
+                    end
                     
                     % Execute addRecord to add result to database
                     Event('Saving Mobius3D data into database');
