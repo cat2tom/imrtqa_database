@@ -11,7 +11,7 @@ end
 delta4 = struct;
 
 % If plan report is from version April 2016 or later
-if length(content{7}) > 7 && strcmp(content{7}(1:7), 'Clinic:')
+if length(content{7}) >= 7 && strcmp(content{7}(1:7), 'Clinic:')
     
     % Store title, patient name, and ID
     delta4.title = strtrim(content{1});
@@ -41,7 +41,7 @@ end
 while r < length(content)
     
     % If row starts with 'Clinic:'
-    if length(content{r}) > 7 && strcmp(content{r}(1:7), 'Clinic:')
+    if length(content{r}) >= 7 && strcmp(content{r}(1:7), 'Clinic:')
         content{r} = content{r}(8:end);
         delta4.clinic = cell(0);
         break;
@@ -54,7 +54,7 @@ end
 while r < length(content)
     
     % If row starts with 'Plan:'
-    if length(content{r}) > 5 && strcmp(content{r}(1:5), 'Plan:')
+    if length(content{r}) >= 5 && strcmp(content{r}(1:5), 'Plan:')
         delta4.plan = strtrim(content{r}(6:end));
         break;
     else
@@ -69,7 +69,7 @@ end
 while r < length(content)
     
     % If row starts with 'Planned:'
-    if length(content{r}) > 8 && strcmp(content{r}(1:8), 'Planned:')
+    if length(content{r}) >= 8 && strcmp(content{r}(1:8), 'Planned:')
         
         % Store planned date
         fields = strsplit(content{r});
@@ -77,7 +77,7 @@ while r < length(content)
             fields{4}], 'InputFormat', 'M/d/yyyy h:m a');
         
         % Store user, if present
-        if length(fields) > 4
+        if length(fields) >= 4
             delta4.planUser = fields{5};
         end
         
@@ -91,7 +91,7 @@ end
 while r < length(content)
     
     % If row starts with 'Measured:'
-    if length(content{r}) > 9 && strcmp(content{r}(1:9), 'Measured:')
+    if length(content{r}) >= 9 && strcmp(content{r}(1:9), 'Measured:')
         
         % Store measured date
         fields = strsplit(content{r});
@@ -99,7 +99,7 @@ while r < length(content)
             fields{4}], 'InputFormat', 'M/d/yyyy h:m a');
         
         % Store user, if present
-        if length(fields) > 4
+        if length(fields) >= 4
             delta4.measUser = fields{5};
         end
         
@@ -113,7 +113,7 @@ end
 while r < length(content)
     
     % If row starts with 'Accepted:' or 'Rejected:' or 'Failed:'
-    if length(content{r}) > 9 && (strcmp(content{r}(1:9), 'Accepted:') || ...
+    if length(content{r}) >= 9 && (strcmp(content{r}(1:9), 'Accepted:') || ...
                 strcmp(content{r}(1:9), 'Rejected:') || ...
                 strcmp(content{r}(1:7), 'Failed:'))
         
@@ -132,7 +132,7 @@ while r < length(content)
         r = r + 1;
     
     % Otherwise, stop if row starts with 'Comments:'
-    elseif length(content{r}) > 9 && strcmp(content{r}(1:9), 'Comments:')
+    elseif length(content{r}) >= 9 && strcmp(content{r}(1:9), 'Comments:')
         
         content{r} = content{r}(10:end);
         break;
@@ -186,7 +186,7 @@ end
 while r < length(content)
     
     % If row starts with 'Radiation Device:'
-    if length(content{r}) > 17 && ...
+    if length(content{r}) >= 17 && ...
             strcmp(content{r}(1:17), 'Radiation Device:')
         delta4.machine = strtrim(content{r}(18:end));
         break;
@@ -199,7 +199,7 @@ end
 while r < length(content)
     
     % If row starts with 'Temperature:'
-    if length(content{r}) > 12 && strcmp(content{r}(1:12), 'Temperature:')
+    if length(content{r}) >= 12 && strcmp(content{r}(1:12), 'Temperature:')
         fields = regexp(content{r}(13:end), '([0-9\.]+)', 'tokens');
         
         if ~isempty(fields)
@@ -215,7 +215,7 @@ end
 while r < length(content)
     
     % If row starts with 'Reference:'
-    if length(content{r}) > 10 && ...
+    if length(content{r}) >= 10 && ...
             strcmp(content{r}(1:10), 'Reference:')
         delta4.reference = strtrim(content{r}(11:end));
         break;
@@ -228,7 +228,7 @@ end
 while r < length(content)
     
     % If row starts with 'Fraction'
-    if length(content{r}) > 8 && ...
+    if length(content{r}) >= 8 && ...
             strcmp(content{r}(1:8), 'Fraction')
         fields = regexp(content{r}(9:end), ['([0-9\.]+) +(c?Gy) +([0-9\.]', ...
             '+)% +([0-9\.]+)% +([0-9\.]+)% +(-?[0-9\.]+)%'], 'tokens');
@@ -287,7 +287,7 @@ end
 while r < length(content)
     
     % If row starts with 'Dose Deviation'
-    if length(content{r}) > 14 && ...
+    if length(content{r}) >= 14 && ...
             strcmp(content{r}(1:14), 'Dose Deviation')
         fields = regexp(content{r}(15:end), ['([0-9\.]+)%[^0-9]+([0-9\.]', ...
             '+)%[^0-9]+([0-9\.]+)%[^0-9]+([0-9\.]+)%'], 'tokens');
@@ -307,7 +307,7 @@ end
 while r < length(content)
     
     % If row starts with 'Dist to Agreement'
-    if length(content{r}) > 17 && ...
+    if length(content{r}) >= 17 && ...
             strcmp(content{r}(1:17), 'Dist to Agreement')
         fields = regexp(content{r}(18:end), ['([0-9\.]+)%[^0-9]+([0-9\.]', ...
             '+)%[^0-9]+([0-9\.]+)'], 'tokens');
@@ -327,7 +327,7 @@ end
 while r < length(content)
     
     % If row starts with 'Gamma Index'
-    if length(content{r}) > 11 && ...
+    if length(content{r}) >= 11 && ...
             strcmp(content{r}(1:11), 'Gamma Index')
         fields = regexp(content{r}(12:end), ['([0-9\.]+)%[^0-9]+([0-9\.]', ...
             '+)%[^0-9]+([0-9\.]+)%[^0-9]+([0-9\.]+)[^0-9]+([0-9\.]+)', ...
